@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>웹 컴포넌트 테스트 페이지</title>
-    <!-- Tailwind CSS CDN -->
+    <title>나이스 급식식단정보 API 탐색기</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,453 +11,524 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
+                        meal: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
                         }
                     }
                 }
             }
         }
     </script>
-    <!-- Phosphor Icons for modern slick icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        /* Custom scrollbar for log viewer */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 9999px;
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-        }
+        body { font-family: 'Pretendard', system-ui, -apple-system, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 9999px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.2); }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col">
+<body class="bg-amber-50/40 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col">
 
     <!-- Header -->
-    <header class="sticky top-0 z-30 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header class="sticky top-0 z-30 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-amber-100 dark:border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="p-2 bg-brand-500 text-white rounded-xl shadow-md shadow-brand-500/20">
-                    <i class="ph ph-flask text-2xl"></i>
+                <div class="p-2.5 bg-amber-500 text-white rounded-2xl shadow-md shadow-amber-500/20">
+                    <i class="ph ph-cooking-pot text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold leading-tight">Web Test Playground</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">UI & Interaction Testing Environment</p>
+                    <h1 class="text-base sm:text-lg font-bold leading-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        나이스 급식식단정보 <span class="text-xs font-normal text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded-full">Open API v1.0</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">전국 초·중·고등학교 급식 메뉴 & 영양 정보 대시보드</p>
                 </div>
             </div>
 
-            <!-- Header Controls -->
             <div class="flex items-center gap-3">
-                <!-- Status Badge -->
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    System Ready
-                </span>
-
-                <!-- Theme Toggle Button -->
-                <button id="themeToggleBtn" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500" title="테마 변경">
+                <!-- Preset Badges -->
+                <button id="toggleApiInfoBtn" class="text-xs px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+                    <i class="ph ph-code text-amber-500"></i>
+                    <span class="hidden sm:inline">API 요청 주소</span>
+                </button>
+                
+                <!-- Dark Mode Toggle -->
+                <button id="themeToggleBtn" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                     <i id="themeIcon" class="ph ph-moon text-xl"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- Left 2 Columns: Test Components Area -->
-        <div class="lg:col-span-2 space-y-6">
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-            <!-- Card 1: Dynamic Counter Component -->
-            <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition-all">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <i class="ph ph-calculator text-brand-500 text-xl"></i>
-                        <h2 class="text-base font-semibold">1. Dynamic Counter</h2>
-                    </div>
-                    <span class="text-xs text-slate-400">State Test</span>
+        <!-- Top Row: Query Parameters & School Selection -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/80">
+            
+            <!-- Quick Presets -->
+            <div class="mb-5 pb-4 border-b border-slate-100 dark:border-slate-700/60">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <i class="ph ph-lightning text-amber-500"></i> 빠른 학교 선택 (Quick Presets)
+                    </span>
                 </div>
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <div class="text-center sm:text-left">
-                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Current Value</span>
-                        <div id="counterValue" class="text-4xl font-extrabold text-slate-900 dark:text-white mt-1">0</div>
-                    </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button id="btnDecrement" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-medium transition-colors active:scale-95 flex items-center justify-center gap-1">
-                            <i class="ph ph-minus font-bold"></i> 감소
-                        </button>
-                        <button id="btnReset" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium transition-colors active:scale-95 flex items-center justify-center gap-1">
-                            <i class="ph ph-arrows-counter-clockwise"></i> 리셋
-                        </button>
-                        <button id="btnIncrement" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-medium shadow-sm transition-colors active:scale-95 flex items-center justify-center gap-1">
-                            <i class="ph ph-plus font-bold"></i> 증가
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Card 2: Interactive Form Controls -->
-            <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition-all">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <i class="ph ph-textbox text-brand-500 text-xl"></i>
-                        <h2 class="text-base font-semibold">2. Form Inputs & Control</h2>
-                    </div>
-                    <span class="text-xs text-slate-400">Input Events</span>
-                </div>
-                
-                <form id="testForm" onsubmit="event.preventDefault();" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Text Input -->
-                        <div>
-                            <label for="textInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">텍스트 입력</label>
-                            <input type="text" id="textInput" placeholder="텍스트를 입력하세요..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
-                        </div>
-
-                        <!-- Select Option -->
-                        <div>
-                            <label for="selectInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">옵션 선택</label>
-                            <select id="selectInput" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
-                                <option value="Option 1">옵션 A - 기본 설정</option>
-                                <option value="Option 2">옵션 B - 확장 기능</option>
-                                <option value="Option 3">옵션 C - 고급 모드</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Range Slider -->
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label for="rangeInput" class="text-xs font-semibold text-slate-600 dark:text-slate-300">슬라이더 범위 (Live Update)</label>
-                            <span id="rangeValue" class="text-xs font-bold text-brand-500 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded">50%</span>
-                        </div>
-                        <input type="range" id="rangeInput" min="0" max="100" value="50" class="w-full accent-brand-500 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg cursor-pointer">
-                    </div>
-
-                    <!-- Checkboxes & Switches -->
-                    <div class="pt-2 flex flex-wrap items-center gap-6">
-                        <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
-                            <input type="checkbox" id="checkbox1" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 w-4 h-4">
-                            <span>이메일 알림 수신</span>
-                        </label>
-                        <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
-                            <input type="checkbox" id="checkbox2" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 w-4 h-4" checked>
-                            <span>자동 저장 사용</span>
-                        </label>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Card 3: Interactive Dynamic List -->
-            <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition-all">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <i class="ph ph-list-checks text-brand-500 text-xl"></i>
-                        <h2 class="text-base font-semibold">3. Dynamic Item List</h2>
-                    </div>
-                    <span id="itemCount" class="text-xs font-medium text-slate-500">Total: 2 items</span>
-                </div>
-
-                <!-- Input group -->
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="newItemInput" placeholder="새 항목 입력 후 추가 버튼 클릭..." class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
-                    <button id="addItemBtn" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-600 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-1 shrink-0">
-                        <i class="ph ph-plus"></i> 추가
-                    </button>
-                </div>
-
-                <!-- Item List Container -->
-                <ul id="itemList" class="space-y-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-                    <!-- Default Items initialized via JavaScript -->
-                </ul>
-            </section>
-
-            <!-- Card 4: Modal Trigger Area -->
-            <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition-all flex items-center justify-between">
-                <div>
-                    <h2 class="text-base font-semibold flex items-center gap-2">
-                        <i class="ph ph-browsers text-brand-500 text-xl"></i> 4. Modal Window Test
-                    </h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">팝업 모달 오버레이 및 키보드(ESC) 이벤트 테스트</p>
-                </div>
-                <button id="openModalBtn" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="ph ph-arrow-square-out text-base"></i> 모달 열기
-                </button>
-            </section>
-        </div>
-
-        <!-- Right 1 Column: Real-time Event Logger -->
-        <div class="lg:col-span-1">
-            <div class="sticky top-24 bg-slate-900 text-slate-200 rounded-2xl shadow-xl border border-slate-800 overflow-hidden flex flex-col h-[600px]">
-                <!-- Log Header -->
-                <div class="px-4 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i class="ph ph-terminal-window text-emerald-400 text-lg"></i>
-                        <span class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-300">Live Event Console</span>
-                    </div>
-                    <button id="clearLogBtn" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-1" title="로그 지우기">
-                        <i class="ph ph-trash"></i> Clear
-                    </button>
-                </div>
-
-                <!-- Log Content Area -->
-                <div id="logContainer" class="flex-1 p-4 font-mono text-xs space-y-2.5 overflow-y-auto custom-scrollbar">
-                    <!-- Logs inserted dynamically -->
-                </div>
-
-                <!-- Log Footer -->
-                <div class="px-4 py-2 bg-slate-950/40 border-t border-slate-800/60 text-[11px] text-slate-500 flex justify-between items-center">
-                    <span>Listening to actions...</span>
-                    <span id="logCount" class="font-bold text-slate-400">0 Events</span>
+                <div class="flex flex-wrap gap-2" id="presetContainer">
+                    <!-- Presets added via JS -->
                 </div>
             </div>
+
+            <!-- Main Filter Form -->
+            <form id="apiFilterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
+                
+                <!-- 1. Education Office Code -->
+                <div class="lg:col-span-3">
+                    <label for="ofcdcCode" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        시도교육청코드 <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="ofcdcCode" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <option value="B10">서울특별시교육청 [B10]</option>
+                        <option value="C10">부산광역시교육청 [C10]</option>
+                        <option value="D10">대구광역시교육청 [D10]</option>
+                        <option value="E10">인천광역시교육청 [E10]</option>
+                        <option value="F10">광주광역시교육청 [F10]</option>
+                        <option value="G10">대전광역시교육청 [G10]</option>
+                        <option value="H10">울산광역시교육청 [H10]</option>
+                        <option value="I10">세종특별자치시교육청 [I10]</option>
+                        <option value="J10">경기도교육청 [J10]</option>
+                        <option value="K10">강원특별자치도교육청 [K10]</option>
+                        <option value="M10">충청북도교육청 [M10]</option>
+                        <option value="N10">충청남도교육청 [N10]</option>
+                        <option value="P10">전라북도교육청 [P10]</option>
+                        <option value="Q10">전라남도교육청 [Q10]</option>
+                        <option value="R10">경상북도교육청 [R10]</option>
+                        <option value="S10">경상남도교육청 [S10]</option>
+                        <option value="T10">제주특별자치도교육청 [T10]</option>
+                    </select>
+                </div>
+
+                <!-- 2. School Code -->
+                <div class="lg:col-span-3">
+                    <label for="schulCode" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        표준학교코드 (7자리) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" id="schulCode" value="7010057" placeholder="예: 7010057" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <!-- 3. Date Input -->
+                <div class="lg:col-span-3">
+                    <label for="mealDate" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        급식일자 (YYYYMMDD)
+                    </label>
+                    <input type="date" id="mealDate" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <!-- 4. Meal Type Code -->
+                <div class="lg:col-span-3">
+                    <label for="mmealCode" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        식사구분
+                    </label>
+                    <select id="mmealCode" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <option value="">전체 (조식/중식/석식)</option>
+                        <option value="1">조식 (아침)</option>
+                        <option value="2" selected>중식 (점심)</option>
+                        <option value="3">석식 (저녁)</option>
+                    </select>
+                </div>
+
+                <!-- API Key (Optional) -->
+                <div class="lg:col-span-9">
+                    <label for="apiKey" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        인증키 (KEY) <span class="text-slate-400 font-normal">(미입력 시 샘플 인증키 적용)</span>
+                    </label>
+                    <input type="text" id="apiKey" placeholder="인증키가 있는 경우 입력하세요" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="lg:col-span-3 flex items-end">
+                    <button type="submit" id="searchBtn" class="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2 active:scale-95">
+                        <i class="ph ph-magnifying-glass text-lg"></i>
+                        <span>급식 식단 조회</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Allergy Filter Selection -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 dark:border-slate-700/80">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <i class="ph ph-warning-circle text-rose-500 text-lg"></i>
+                    <h2 class="text-xs sm:text-sm font-bold">알레르기 경고 필터링</h2>
+                    <span class="text-xs text-slate-400 hidden sm:inline">(클릭하여 주의할 식재료 선택)</span>
+                </div>
+                <button id="resetAllergyBtn" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline">필터 초기화</button>
+            </div>
+            <div class="flex flex-wrap gap-1.5" id="allergyFilterContainer">
+                <!-- Allergy filter tags inserted via JS -->
+            </div>
+        </section>
+
+        <!-- API Info & Request Snippet (Collapsible) -->
+        <section id="apiInfoPanel" class="hidden bg-slate-900 text-slate-200 rounded-2xl p-5 shadow-lg border border-slate-800 space-y-3 font-mono text-xs">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <span class="font-bold text-amber-400 flex items-center gap-2">
+                    <i class="ph ph-globe"></i> Request Endpoint & cURL
+                </span>
+                <button id="closeApiInfoBtn" class="text-slate-400 hover:text-white">
+                    <i class="ph ph-x text-base"></i>
+                </button>
+            </div>
+            <div>
+                <span class="text-slate-500 block mb-1">// Request URL</span>
+                <div class="flex gap-2">
+                    <input type="text" id="requestUrlInput" readonly class="w-full bg-slate-950 px-3 py-2 rounded-xl text-slate-300 border border-slate-800 selection:bg-amber-500/30">
+                    <button id="copyUrlBtn" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200 shrink-0 flex items-center gap-1">
+                        <i class="ph ph-copy"></i> 복사
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Results Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left 2 Cols: Meal Cards -->
+            <div class="lg:col-span-2 space-y-4">
+                
+                <!-- Status & School Meta -->
+                <div id="schoolMetaHeader" class="flex flex-wrap items-center justify-between gap-2 px-1">
+                    <div class="flex items-center gap-2">
+                        <i class="ph ph-buildings text-amber-500 text-xl"></i>
+                        <h2 id="displaySchoolName" class="text-lg font-bold">학교를 선택하고 조회하세요</h2>
+                    </div>
+                    <span id="displayDate" class="text-xs font-semibold px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg">
+                        날짜 미선택
+                    </span>
+                </div>
+
+                <!-- Meal Cards Container -->
+                <div id="mealCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cards will be dynamically injected here -->
+                </div>
+
+                <!-- Empty State / Skeleton -->
+                <div id="emptyState" class="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center border border-slate-200/80 dark:border-slate-700/80">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-amber-50 dark:bg-slate-700 rounded-full flex items-center justify-center text-amber-500 text-3xl">
+                        <i class="ph ph-fork-knife"></i>
+                    </div>
+                    <h3 class="font-bold text-base mb-1">조회된 급식 식단 정보가 없습니다</h3>
+                    <p class="text-xs text-slate-400 max-w-sm mx-auto">상단 조회 버튼을 누르거나, 토요일/일요일 및 공휴일에는 급식이 제공되지 않을 수 있습니다.</p>
+                </div>
+            </div>
+
+            <!-- Right 1 Col: Raw Response Viewer -->
+            <div class="lg:col-span-1">
+                <div class="bg-slate-900 text-slate-200 rounded-2xl shadow-xl border border-slate-800 overflow-hidden flex flex-col h-[520px]">
+                    <div class="px-4 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="ph ph-code-block text-amber-400 text-lg"></i>
+                            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-300">Raw JSON Output</span>
+                        </div>
+                        <button id="copyJsonBtn" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-1">
+                            <i class="ph ph-copy"></i> 복사
+                        </button>
+                    </div>
+                    <div class="flex-1 p-4 font-mono text-xs overflow-y-auto custom-scrollbar bg-slate-950/40">
+                        <pre id="jsonViewer" class="text-amber-200/80 whitespace-pre-wrap break-all">// API 응답 결과가 이곳에 표시됩니다.</pre>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
     </main>
 
-    <!-- Modal Window Overlay -->
-    <div id="modalOverlay" class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 transform scale-95 transition-transform duration-200" id="modalBox">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
-                <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="ph ph-info text-brand-500 text-xl"></i> 테스트 모달 대화상자
-                </h3>
-                <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg p-1 transition-colors">
-                    <i class="ph ph-x text-lg"></i>
-                </button>
-            </div>
-            <div class="py-4 text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                <p>이 상자는 모달 창 테스트용 대화상자입니다.</p>
-                <p class="text-xs text-slate-400 dark:text-slate-500">배경 클릭, 닫기 버튼, 또는 키보드의 <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600">Esc</kbd> 키를 눌러 닫을 수 있습니다.</p>
-            </div>
-            <div class="pt-3 flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700">
-                <button id="modalConfirmBtn" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-medium text-sm rounded-xl transition-colors">
-                    확인
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript Section -->
+    <!-- JS Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            let logCounter = 0;
+            
+            // Allergy code map
+            const ALLERGY_MAP = {
+                '1': '난류', '2': '우유', '3': '메밀', '4': '땅콩', '5': '대두',
+                '6': '밀', '7': '고등어', '8': '게', '9': '새우', '10': '돼지고기',
+                '11': '복숭아', '12': '토마토', '13': '아황산류', '14': '호두', '15': '닭고기',
+                '16': '쇠고기', '17': '오징어', '18': '조개류'
+            };
 
-            // Helper function to add logs
-            function addLog(message, type = 'info') {
-                logCounter++;
-                const logContainer = document.getElementById('logContainer');
-                const logCountEl = document.getElementById('logCount');
-                
-                const time = new Date().toLocaleTimeString('ko-KR', { hour12: false });
-                const logItem = document.createElement('div');
-                
-                let typeColor = 'text-sky-400';
-                if (type === 'success') typeColor = 'text-emerald-400';
-                if (type === 'warning') typeColor = 'text-amber-400';
-                if (type === 'danger') typeColor = 'text-rose-400';
+            // Selected allergy alert filter
+            const selectedAllergies = new Set();
 
-                logItem.className = 'flex items-start gap-2 leading-relaxed animate-fadeIn';
-                logItem.innerHTML = `
-                    <span class="text-slate-500 shrink-0">[${time}]</span>
-                    <span class="${typeColor} break-all">${message}</span>
-                `;
+            // Preset popular test schools
+            const PRESETS = [
+                { name: '서울고등학교', ofcdc: 'B10', schul: '7010057' },
+                { name: '경기고등학교', ofcdc: 'B10', schul: '7010083' },
+                { name: '부산고등학교', ofcdc: 'C10', schul: '7150083' },
+                { name: '대구일과학고', ofcdc: 'D10', schul: '7240228' },
+                { name: '인천하늘고', ofcdc: 'E10', schul: '7310243' },
+                { name: '전남대학교사범대학부설고', ofcdc: 'F10', schul: '7380023' }
+            ];
 
-                logContainer.appendChild(logItem);
-                logContainer.scrollTop = logContainer.scrollHeight;
-                logCountEl.textContent = `${logCounter} Events`;
-            }
+            // Set default date to today (YYYY-MM-DD for input)
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('mealDate').value = `${yyyy}-${mm}-${dd}`;
 
-            // Initial startup log
-            addLog('웹 컴포넌트 테스트 페이지 준비 완료', 'success');
+            // Initialize Presets
+            const presetContainer = document.getElementById('presetContainer');
+            PRESETS.forEach(preset => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'text-xs px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-slate-700/60 hover:bg-amber-100 dark:hover:bg-slate-700 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-slate-600 transition-all flex items-center gap-1 active:scale-95';
+                btn.innerHTML = `<i class="ph ph-map-pin"></i> ${preset.name}`;
+                btn.addEventListener('click', () => {
+                    document.getElementById('ofcdcCode').value = preset.ofcdc;
+                    document.getElementById('schulCode').value = preset.schul;
+                    fetchMealData();
+                });
+                presetContainer.appendChild(btn);
+            });
 
-            // 1. Theme Toggle Logic
+            // Initialize Allergy Filters
+            const allergyFilterContainer = document.getElementById('allergyFilterContainer');
+            Object.entries(ALLERGY_MAP).forEach(([code, name]) => {
+                const badge = document.createElement('button');
+                badge.type = 'button';
+                badge.className = 'text-xs px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-rose-300 transition-all flex items-center gap-1';
+                badge.dataset.code = code;
+                badge.innerHTML = `<span class="text-[10px] font-mono text-slate-400">${code}</span>${name}`;
+                badge.addEventListener('click', () => {
+                    if (selectedAllergies.has(code)) {
+                        selectedAllergies.delete(code);
+                        badge.classList.remove('bg-rose-500', 'text-white', 'border-rose-500');
+                        badge.classList.add('bg-slate-50', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+                    } else {
+                        selectedAllergies.add(code);
+                        badge.classList.remove('bg-slate-50', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+                        badge.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+                    }
+                    // Re-render menu cards to highlight matching allergens
+                    if (currentMealData) renderMealCards(currentMealData);
+                });
+                allergyFilterContainer.appendChild(badge);
+            });
+
+            // Reset Allergy Filters
+            document.getElementById('resetAllergyBtn').addEventListener('click', () => {
+                selectedAllergies.clear();
+                Array.from(allergyFilterContainer.children).forEach(btn => {
+                    btn.classList.remove('bg-rose-500', 'text-white', 'border-rose-500');
+                    btn.classList.add('bg-slate-50', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+                });
+                if (currentMealData) renderMealCards(currentMealData);
+            });
+
+            // Theme Toggle
             const themeToggleBtn = document.getElementById('themeToggleBtn');
             const themeIcon = document.getElementById('themeIcon');
-            const htmlEl = document.documentElement;
-
             themeToggleBtn.addEventListener('click', () => {
-                const isDark = htmlEl.classList.toggle('dark');
-                if (isDark) {
-                    themeIcon.className = 'ph ph-sun text-xl';
-                    addLog('테마 변경: Dark Mode Active', 'warning');
-                } else {
-                    themeIcon.className = 'ph ph-moon text-xl';
-                    addLog('테마 변경: Light Mode Active', 'info');
-                }
+                const isDark = document.documentElement.classList.toggle('dark');
+                themeIcon.className = isDark ? 'ph ph-sun text-xl' : 'ph ph-moon text-xl';
             });
 
-            // 2. Counter Logic
-            let count = 0;
-            const counterValue = document.getElementById('counterValue');
-            const btnIncrement = document.getElementById('btnIncrement');
-            const btnDecrement = document.getElementById('btnDecrement');
-            const btnReset = document.getElementById('btnReset');
+            // Toggle API Info Panel
+            const apiInfoPanel = document.getElementById('apiInfoPanel');
+            document.getElementById('toggleApiInfoBtn').addEventListener('click', () => {
+                apiInfoPanel.classList.toggle('hidden');
+            });
+            document.getElementById('closeApiInfoBtn').addEventListener('click', () => {
+                apiInfoPanel.classList.add('hidden');
+            });
 
-            function updateCounter(val, actionName) {
-                count = val;
-                counterValue.textContent = count;
-                addLog(`카운터 ${actionName}: 현재 값 = ${count}`, 'info');
-            }
+            // Copy Buttons
+            document.getElementById('copyUrlBtn').addEventListener('click', () => {
+                const input = document.getElementById('requestUrlInput');
+                document.execCommand('copy');
+                alert('요청 URL이 클립보드에 복사되었습니다.');
+            });
 
-            btnIncrement.addEventListener('click', () => updateCounter(count + 1, '증가'));
-            btnDecrement.addEventListener('click', () => updateCounter(count - 1, '감소'));
-            btnReset.addEventListener('click', () => updateCounter(0, '리셋'));
+            document.getElementById('copyJsonBtn').addEventListener('click', () => {
+                const jsonText = document.getElementById('jsonViewer').textContent;
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = jsonText;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+                alert('JSON 데이터가 클립보드에 복사되었습니다.');
+            });
 
-            // 3. Form Inputs Logic
-            const textInput = document.getElementById('textInput');
-            const selectInput = document.getElementById('selectInput');
-            const rangeInput = document.getElementById('rangeInput');
-            const rangeValue = document.getElementById('rangeValue');
-            const checkbox1 = document.getElementById('checkbox1');
-            const checkbox2 = document.getElementById('checkbox2');
+            let currentMealData = null;
 
-            // Text Input Event (Debounced log)
-            let timeoutId;
-            textInput.addEventListener('input', (e) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    if(e.target.value.trim() !== '') {
-                        addLog(`텍스트 입력: "${e.target.value}"`, 'info');
+            // Fetch Meal Data Logic
+            async function fetchMealData() {
+                const ofcdcCode = document.getElementById('ofcdcCode').value;
+                const schulCode = document.getElementById('schulCode').value.trim();
+                const rawDate = document.getElementById('mealDate').value; // YYYY-MM-DD
+                const mmealCode = document.getElementById('mmealCode').value;
+                const apiKey = document.getElementById('apiKey').value.trim() || 'sample';
+
+                if (!schulCode) {
+                    alert('표준학교코드를 입력해주세요.');
+                    return;
+                }
+
+                const cleanDate = rawDate.replace(/-/g, ''); // YYYYMMDD
+
+                // Construct NEIS API URL
+                let url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&pIndex=1&pSize=100&KEY=${apiKey}&ATPT_OFCDC_SC_CODE=${ofcdcCode}&SD_SCHUL_CODE=${schulCode}`;
+                if (cleanDate) url += `&MLSV_YMD=${cleanDate}`;
+                if (mmealCode) url += `&MMEAL_SC_CODE=${mmealCode}`;
+
+                document.getElementById('requestUrlInput').value = url;
+                document.getElementById('jsonViewer').textContent = '// 데이터 조회 중...';
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    currentMealData = data;
+                    document.getElementById('jsonViewer').textContent = JSON.stringify(data, null, 2);
+
+                    // Check for valid meal data response
+                    if (data.mealServiceDietInfo && data.mealServiceDietInfo[1] && data.mealServiceDietInfo[1].row) {
+                        const rows = data.mealServiceDietInfo[1].row;
+                        renderMealCards(rows);
+                    } else {
+                        renderEmptyState('조회된 급식 식단 정보가 없습니다. (주말, 공휴일 또는 방학기간일 수 있습니다.)');
                     }
-                }, 500);
-            });
-
-            // Select Option Event
-            selectInput.addEventListener('change', (e) => {
-                addLog(`옵션 선택 변경: ${e.target.value}`, 'info');
-            });
-
-            // Range Input Event
-            rangeInput.addEventListener('input', (e) => {
-                const val = e.target.value;
-                rangeValue.textContent = `${val}%`;
-            });
-            rangeInput.addEventListener('change', (e) => {
-                addLog(`슬라이더값 확정: ${e.target.value}%`, 'info');
-            });
-
-            // Checkbox Events
-            [checkbox1, checkbox2].forEach((cb, idx) => {
-                cb.addEventListener('change', (e) => {
-                    addLog(`체크박스 #${idx + 1} 상태 변경: ${e.target.checked ? 'Checked' : 'Unchecked'}`, 'info');
-                });
-            });
-
-            // 4. Item List Logic
-            const itemList = document.getElementById('itemList');
-            const newItemInput = document.getElementById('newItemInput');
-            const addItemBtn = document.getElementById('addItemBtn');
-            const itemCount = document.getElementById('itemCount');
-
-            const defaultItems = ['샘플 테스트 데이터 항목 1', 'API 대기열 응답 항목 2'];
-
-            function updateItemCount() {
-                const total = itemList.children.length;
-                itemCount.textContent = `Total: ${total} items`;
-            }
-
-            function renderItem(text) {
-                const li = document.createElement('li');
-                li.className = 'flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 transition-all hover:border-slate-300 dark:hover:border-slate-700';
-                li.innerHTML = `
-                    <span class="text-sm font-medium text-slate-700 dark:text-slate-200 break-all">${text}</span>
-                    <button class="delete-btn p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors" title="삭제">
-                        <i class="ph ph-trash text-base pointer-events-none"></i>
-                    </button>
-                `;
-
-                // Delete event
-                li.querySelector('.delete-btn').addEventListener('click', () => {
-                    li.remove();
-                    updateItemCount();
-                    addLog(`항목 삭제됨: "${text}"`, 'warning');
-                });
-
-                itemList.appendChild(li);
-                updateItemCount();
-            }
-
-            // Populate initial list
-            defaultItems.forEach(item => renderItem(item));
-
-            // Add new item function
-            function handleAddItem() {
-                const value = newItemInput.value.trim();
-                if (value) {
-                    renderItem(value);
-                    addLog(`새 항목 추가됨: "${value}"`, 'success');
-                    newItemInput.value = '';
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('jsonViewer').textContent = `// API 호출 오류 발생:\n${err.message}`;
+                    renderEmptyState('API 통신 오류가 발생했습니다. (인증키 또는 네트워크 상태를 확인하세요)');
                 }
             }
 
-            addItemBtn.addEventListener('click', handleAddItem);
-            newItemInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleAddItem();
-            });
-
-            // 5. Modal Window Logic
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalBox = document.getElementById('modalBox');
-            const openModalBtn = document.getElementById('openModalBtn');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const modalConfirmBtn = document.getElementById('modalConfirmBtn');
-
-            function openModal() {
-                modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
-                modalBox.classList.remove('scale-95');
-                modalBox.classList.add('scale-100');
-                addLog('모달 대화상자 열림', 'info');
+            // Render Empty State
+            function renderEmptyState(msg) {
+                document.getElementById('mealCardsGrid').innerHTML = '';
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('emptyState').querySelector('p').textContent = msg;
+                document.getElementById('displaySchoolName').textContent = '결과 없음';
+                document.getElementById('displayDate').textContent = '-';
             }
 
-            function closeModal(action = '닫기') {
-                modalOverlay.classList.add('opacity-0', 'pointer-events-none');
-                modalBox.classList.remove('scale-100');
-                modalBox.classList.add('scale-95');
-                addLog(`모달 대화상자 닫힘 (${action})`, 'info');
-            }
-
-            openModalBtn.addEventListener('click', openModal);
-            closeModalBtn.addEventListener('click', () => closeModal('X 버튼 클릭'));
-            modalConfirmBtn.addEventListener('click', () => closeModal('확인 버튼 클릭'));
-
-            // Close on overlay click
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target === modalOverlay) closeModal('배경 클릭');
-            });
-
-            // Close on Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !modalOverlay.classList.contains('opacity-0')) {
-                    closeModal('ESC 키');
+            // Clean Menu Item Text & Extract Allergies
+            function parseDish(dishString) {
+                // NEIS DDISH_NM format: "미역국 (5.6.10)"
+                const match = dishString.match(/(.*?)\s*\(?([0-9.]+)\)?$/);
+                if (match) {
+                    const name = match[1].replace(/\*/g, '').trim();
+                    const codes = match[2].split('.').filter(Boolean);
+                    return { name, codes };
                 }
+                return { name: dishString.replace(/\*/g, '').trim(), codes: [] };
+            }
+
+            // Render Meal Cards UI
+            function renderMealCards(rows) {
+                const grid = document.getElementById('mealCardsGrid');
+                grid.innerHTML = '';
+                document.getElementById('emptyState').classList.add('hidden');
+
+                if (rows.length > 0) {
+                    document.getElementById('displaySchoolName').textContent = rows[0].SCHUL_NM;
+                    const dateStr = rows[0].MLSV_YMD;
+                    const formattedDate = `${dateStr.substring(0,4)}.${dateStr.substring(4,6)}.${dateStr.substring(6,8)}`;
+                    document.getElementById('displayDate').textContent = formattedDate;
+                }
+
+                rows.forEach(meal => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-700/80 flex flex-col justify-between space-y-4';
+
+                    // Parse Dishes
+                    const rawDishes = meal.DDISH_NM.split('<br/>');
+                    const parsedDishes = rawDishes.map(parseDish);
+
+                    // Check if any item contains user-selected allergens
+                    let containsSelectedAllergen = false;
+                    parsedDishes.forEach(d => {
+                        d.codes.forEach(code => {
+                            if (selectedAllergies.has(code)) containsSelectedAllergen = true;
+                        });
+                    });
+
+                    // Meal Type Badge Color
+                    let mealBadgeColor = 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
+                    if (meal.MMEAL_SC_NM === '조식') mealBadgeColor = 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300';
+                    if (meal.MMEAL_SC_NM === '석식') mealBadgeColor = 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300';
+
+                    // Dishes HTML
+                    const dishesListHtml = parsedDishes.map(dish => {
+                        const allergyBadges = dish.codes.map(code => {
+                            const isWarn = selectedAllergies.has(code);
+                            const name = ALLERGY_MAP[code] || code;
+                            const badgeBg = isWarn ? 'bg-rose-500 text-white font-bold animate-pulse' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
+                            return `<span class="inline-block text-[10px] px-1.5 py-0.2 rounded ${badgeBg}" title="${code}:${name}">${name}</span>`;
+                        }).join(' ');
+
+                        return `
+                            <li class="flex items-start justify-between gap-2 py-1.5 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                                <span class="text-sm font-medium text-slate-800 dark:text-slate-200">${dish.name}</span>
+                                <div class="flex flex-wrap gap-1 justify-end shrink-0">${allergyBadges}</div>
+                            </li>
+                        `;
+                    }).join('');
+
+                    card.innerHTML = `
+                        <div>
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-700">
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${mealBadgeColor}">
+                                    ${meal.MMEAL_SC_NM}
+                                </span>
+                                <span class="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                                    <i class="ph ph-fire text-amber-500"></i> ${meal.CAL_INFO || '칼로리 정보 없음'}
+                                </span>
+                            </div>
+
+                            ${containsSelectedAllergen ? `
+                                <div class="mb-3 p-2 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs">
+                                    <i class="ph ph-warning text-base shrink-0"></i>
+                                    <span>선택한 알레르기 유발 식재료가 포함되어 있습니다!</span>
+                                </div>
+                            ` : ''}
+
+                            <!-- Menu List -->
+                            <ul class="space-y-0.5">
+                                ${dishesListHtml}
+                            </ul>
+                        </div>
+
+                        <!-- Card Footer Meta Info -->
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60 text-[11px] text-slate-400 space-y-1">
+                            <div class="truncate" title="${meal.NT_INFO || ''}">
+                                <span class="font-semibold text-slate-500">인원수:</span> ${meal.PNT_INTEG_CMPNT_CNT || '-'}명
+                            </div>
+                        </div>
+                    `;
+
+                    grid.appendChild(card);
+                });
+            }
+
+            // Form Submit Handler
+            document.getElementById('apiFilterForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                fetchMealData();
             });
 
-            // 6. Clear Logs
-            const clearLogBtn = document.getElementById('clearLogBtn');
-            clearLogBtn.addEventListener('click', () => {
-                document.getElementById('logContainer').innerHTML = '';
-                logCounter = 0;
-                document.getElementById('logCount').textContent = '0 Events';
-                addLog('콘솔 로그 초기화됨', 'warning');
-            });
+            // Initial Fetch on Load
+            fetchMealData();
         });
     </script>
 </body>
